@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Добро пожаловать</title>
+</head>
+<body>
+    {% if user.is_authenticated %}
+        <h1>Привет, {{ user.first_name }}!</h1>
+        <nav>
+            <a href="{% url 'profile' %}">Профиль</a> |
+<form action="{% url 'logout' %}" method="post" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit" style="background:none;border:none;padding:0;color:#007bff;cursor:pointer;">Выход</button>
+</form>        </nav>
+    {% else %}
+        <h1>Добро пожаловать!</h1>
+        <nav>
+            <a href="{% url 'register' %}">Регистрация</a> |
+            <a href="{% url 'login' %}">Вход</a>
+        </nav>
+    {% endif %}
+    <hr>
+    {% block content %}{% endblock %}
+</body>
+</html>
