@@ -29,18 +29,36 @@ def register(request):
 	if request.method == 'POST':
 		form = RegisterForm(request.POST)
 		if form.is_valid():
-			user = User.objects.create_user(
-				username=form.cleaned_data['email'],
-				email=form.cleaned_data['email'],
-				password=form.cleaned_data['password'],
-				first_name=form.cleaned_data['first_name'],
-				last_name=form.cleaned_data['last_name'],
-			)
-			Profile.objects.create(
-				user=user,
-				patronymic=form.cleaned_data['patronymic']
-			)
-			return redirect('login')  
+			email = form.cleaned_data['email']
+			user_qs = User.objects.filter(email=email)
+			if user_qs.exists():
+				user = user_qs.first()
+				if not user.is_active:
+					user.username = email
+					user.first_name = form.cleaned_data['first_name']
+					user.last_name = form.cleaned_data['last_name']
+					user.set_password(form.cleaned_data['password'])
+					user.is_active = True
+					user.save()
+					profile, _ = Profile.objects.get_or_create(user=user)
+					profile.patronymic = form.cleaned_data['patronymic']
+					profile.save()
+					return redirect('login')
+				else:
+					form.add_error('email', 'Пользователь с таким email уже существует и активен.')
+			else:
+				user = User.objects.create_user(
+					username=email,
+					email=email,
+					password=form.cleaned_data['password'],
+					first_name=form.cleaned_data['first_name'],
+					last_name=form.cleaned_data['last_name'],
+				)
+				Profile.objects.create(
+					user=user,
+					patronymic=form.cleaned_data['patronymic']
+				)
+				return redirect('login')
 	else:
 		form = RegisterForm()
 	return render(request, 'register.html', {'form': form})
@@ -64,20 +82,27 @@ class ProfileForm(forms.ModelForm):
             self.fields['email'].initial = user.email
             self.fields['patronymic'].initial = getattr(user.profile, 'patronymic', '')
 
+
 @login_required
 def profile_view(request):
-    user = request.user
-    profile, created = Profile.objects.get_or_create(user=user)
-    if request.method == 'POST':
-        form = ProfileForm(request.POST, instance=profile, user=user)
-        if form.is_valid():
-            user.first_name = form.cleaned_data['first_name']
-            user.last_name = form.cleaned_data['last_name']
-            user.email = form.cleaned_data['email']
-            user.save()
-            profile.patronymic = form.cleaned_data['patronymic']
-            profile.save()
-            return redirect('profile')
-    else:
-        form = ProfileForm(instance=profile, user=user)
-    return render(request, 'profile.html', {'form': form})
+	user = request.user
+	profile, created = Profile.objects.get_or_create(user=user)
+	if request.method == 'POST':
+		if 'delete_account' in request.POST:
+			user.is_active = False
+			user.save()
+			from django.contrib.auth import logout
+			logout(request)
+			return redirect('home')
+		form = ProfileForm(request.POST, instance=profile, user=user)
+		if form.is_valid():
+			user.first_name = form.cleaned_data['first_name']
+			user.last_name = form.cleaned_data['last_name']
+			user.email = form.cleaned_data['email']
+			user.save()
+			profile.patronymic = form.cleaned_data['patronymic']
+			profile.save()
+			return redirect('profile')
+	else:
+		form = ProfileForm(instance=profile, user=user)
+	return render(request, 'profile.html', {'form': form})
