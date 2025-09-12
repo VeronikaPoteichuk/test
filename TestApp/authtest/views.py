@@ -169,4 +169,6 @@ from .access_utils import check_access
 def assign_role_page(request):
 	user = request.user
 	can_assign, code = check_access(user, 'userrole', 'assign_role')
-	return render(request, 'assign_role.html', {'can_assign_role': bool(can_assign)})
+	if not can_assign:
+		return HttpResponse('Forbidden', status=403)
+	return render(request, 'assign_role.html', {'can_assign_role': True})

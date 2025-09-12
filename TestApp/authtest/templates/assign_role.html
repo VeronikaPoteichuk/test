@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<h2>Назначить роль пользователю</h2>
+
+{% if can_assign_role %}
+<form id="assign-role-form">
+  <label>Email пользователя:</label>
+  <input type="text" id="user-email" list="user-list" autocomplete="off" required>
+  <datalist id="user-list"></datalist>
+  <br/>
+  <label>Роль:</label>
+  <select id="role-select"></select>
+  <br/>
+  <button type="submit">Назначить роль</button>
+</form>
+
+<div id="assign-role-result"></div>
+
+<script src="{% static 'auth_fetch.js' %}"></script>
+<script>
+  (() => {
+    const datalist = document.getElementById('user-list');
+    const roleSelect = document.getElementById('role-select');
+    const resultBox = document.getElementById('assign-role-result');
+    let usersCache = [];
+
+    authFetch('/api/all-users/')
+      .then(r => r.ok ? r.json() : Promise.reject(r))
+      .then(data => {
+        datalist.innerHTML = '';
+        if (Array.isArray(data.users)) {
+          usersCache = data.users;
+          data.users
+            .filter(u => u.is_active === undefined || u.is_active)
+            .forEach(user => {
+              const opt = document.createElement('option');
+              opt.value = user.email;
+              datalist.appendChild(opt);
+            });
+        }
+      })
+      .catch(() => { resultBox.textContent = 'Не удалось загрузить список пользователей.'; });
+
+    authFetch('/api/roles/')
+      .then(r => r.ok ? r.json() : Promise.reject(r))
+      .then(data => {
+        roleSelect.innerHTML = '';
+        (Array.isArray(data) ? data : []).forEach(role => {
+          const opt = document.createElement('option');
+          opt.value = role.id;
+          opt.textContent = role.name;
+          roleSelect.appendChild(opt);
+        });
+      })
+      .catch(() => { resultBox.textContent = 'Не удалось загрузить роли.'; });
+
+    document.getElementById('assign-role-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('user-email').value.trim();
+      const roleId = roleSelect.value;
+
+      const userObj = usersCache.find(u => u.email === email);
+      if (!userObj) {
+        resultBox.textContent = 'Пользователь не найден.';
+        return;
+      }
+
+      authFetch('/api/userroles/assign/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userObj.id, role_id: roleId })
+      })
+        .then(r => r.json())
+        .then(data => {
+          resultBox.textContent = data.success || data.message || data.error || 'Готово';
+        })
+        .catch(() => { resultBox.textContent = 'Ошибка назначения роли.'; });
+    });
+  })();
+</script>
+{% endif %}
+
+{% endblock %}

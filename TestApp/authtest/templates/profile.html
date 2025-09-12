@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Профиль пользователя</h2>
+{% if can_edit %}
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
@@ -10,4 +11,12 @@
     {% csrf_token %}
     <button type="submit" name="delete_account" onclick="return confirm('Вы уверены, что хотите удалить аккаунт?');" style="color:red;">Удалить аккаунт</button>
 </form>
+{% else %}
+<div>
+    <p><b>Имя:</b> {{ user.first_name }}</p>
+    <p><b>Фамилия:</b> {{ user.last_name }}</p>
+    <p><b>Отчество:</b> {{ profile_obj.patronymic }}</p>
+    <p><b>Email:</b> {{ user.email }}</p>
+</div>
+{% endif %}
 {% endblock %}
