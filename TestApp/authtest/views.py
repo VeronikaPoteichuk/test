@@ -1,8 +1,13 @@
 from django.shortcuts import render, redirect
+from .models import Profile
 from django.contrib.auth.models import User
 from .models import Profile
 from django import forms
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.contrib.auth import get_user_model
+from django.http import JsonResponse
+from .access_utils import check_access
 
 
 class RegisterForm(forms.ModelForm):
@@ -31,6 +36,8 @@ def register(request):
 		if form.is_valid():
 			email = form.cleaned_data['email']
 			user_qs = User.objects.filter(email=email)
+			from authtest.models import Role, UserRole
+			user_role, _ = Role.objects.get_or_create(name='user')
 			if user_qs.exists():
 				user = user_qs.first()
 				if not user.is_active:
@@ -43,6 +50,7 @@ def register(request):
 					profile, _ = Profile.objects.get_or_create(user=user)
 					profile.patronymic = form.cleaned_data['patronymic']
 					profile.save()
+					UserRole.objects.get_or_create(user=user, role=user_role)
 					return redirect('login')
 				else:
 					form.add_error('email', 'Пользователь с таким email уже существует и активен.')
@@ -58,6 +66,7 @@ def register(request):
 					user=user,
 					patronymic=form.cleaned_data['patronymic']
 				)
+				UserRole.objects.get_or_create(user=user, role=user_role)
 				return redirect('login')
 	else:
 		form = RegisterForm()
@@ -86,8 +95,16 @@ class ProfileForm(forms.ModelForm):
 @login_required
 def profile_view(request):
 	user = request.user
+	view_access, view_code = check_access(user, 'profile', 'view_profile')
+	if view_code == 401:
+		return HttpResponse('Unauthorized', status=401)
+	if view_code == 403:
+		return HttpResponse('Forbidden', status=403)
 	profile, created = Profile.objects.get_or_create(user=user)
+	can_edit, edit_code = check_access(user, 'profile', 'edit_profile')
 	if request.method == 'POST':
+		if not can_edit:
+			return HttpResponse('Forbidden', status=403)
 		if 'delete_account' in request.POST:
 			user.is_active = False
 			user.save()
@@ -105,4 +122,51 @@ def profile_view(request):
 			return redirect('profile')
 	else:
 		form = ProfileForm(instance=profile, user=user)
-	return render(request, 'profile.html', {'form': form})
+	return render(request, 'profile.html', {
+		'form': form,
+		'can_edit': can_edit,
+		'user': user,
+		'profile_obj': profile,
+	})
+
+def base_context(request):
+	profile = None
+	if request.user.is_authenticated:
+		try:
+			profile = Profile.objects.get(user=request.user)
+			from .models import UserRole, Role
+			admin_role = Role.objects.filter(name='admin').first()
+			if admin_role:
+				has_admin = UserRole.objects.filter(user=request.user, role=admin_role).exists()
+				if has_admin and profile.role != admin_role:
+					profile.role = admin_role
+					profile.save()
+		except Profile.DoesNotExist:
+			profile = None
+	return {'profile_obj': profile}
+
+@login_required
+def all_users_view(request):
+	if not request.user.is_authenticated:
+		return JsonResponse({'error': 'Unauthorized'}, status=401)
+	User = get_user_model()
+	users = User.objects.all()
+	users_data = [
+		{
+			'id': user.id,
+			'username': user.username,
+			'email': user.email,
+			'first_name': user.first_name,
+			'last_name': user.last_name,
+		}
+		for user in users
+	]
+	return JsonResponse({'users': users_data})
+
+from .access_utils import check_access
+
+@login_required
+def assign_role_page(request):
+	user = request.user
+	can_assign, code = check_access(user, 'userrole', 'assign_role')
+	return render(request, 'assign_role.html', {'can_assign_role': bool(can_assign)})
