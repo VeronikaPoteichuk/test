@@ -1,5 +1,3 @@
-from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse
 from authtest.models import RolePermission, UserRole, Resource, Permission
 
 def check_access(user, resource_name, permission_code):

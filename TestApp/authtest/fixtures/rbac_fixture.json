@@ -1,0 +1,177 @@
+[
+    {
+        "model": "authtest.role",
+        "pk": 1,
+        "fields": {
+            "name": "admin",
+            "description": "Администратор"
+        }
+    },
+    {
+        "model": "authtest.role",
+        "pk": 2,
+        "fields": {
+            "name": "user",
+            "description": "Пользователь"
+        }
+    },
+    {
+        "model": "authtest.role",
+        "pk": 3,
+        "fields": {
+            "name": "guest",
+            "description": "Гость"
+        }
+    },
+    {
+        "model": "authtest.resource",
+        "pk": 1,
+        "fields": {
+            "name": "profile",
+            "description": "Профиль пользователя"
+        }
+    },
+    {
+        "model": "authtest.resource",
+        "pk": 2,
+        "fields": {
+            "name": "assign_role",
+            "description": "Назначение ролей"
+        }
+    },
+    {
+        "model": "authtest.permission",
+        "pk": 1,
+        "fields": {
+            "code": "view_profile",
+            "description": "Просмотр профиля"
+        }
+    },
+    {
+        "model": "authtest.permission",
+        "pk": 2,
+        "fields": {
+            "code": "edit_profile",
+            "description": "Редактирование профиля"
+        }
+    },
+    {
+        "model": "authtest.permission",
+        "pk": 3,
+        "fields": {
+            "code": "assign_role_page",
+            "description": "Назначение ролей"
+        }
+    },
+    {
+        "model": "authtest.rolepermission",
+        "pk": 1,
+        "fields": {
+            "role": 1,
+            "permission": 1,
+            "resource": 1
+        }
+    },
+    {
+        "model": "authtest.rolepermission",
+        "pk": 2,
+        "fields": {
+            "role": 1,
+            "permission": 2,
+            "resource": 1
+        }
+    },
+    {
+        "model": "authtest.rolepermission",
+        "pk": 3,
+        "fields": {
+            "role": 1,
+            "permission": 3,
+            "resource": 2
+        }
+    },
+    {
+        "model": "authtest.rolepermission",
+        "pk": 4,
+        "fields": {
+            "role": 2,
+            "permission": 1,
+            "resource": 1
+        }
+    },
+    {
+        "model": "authtest.rolepermission",
+        "pk": 5,
+        "fields": {
+            "role": 2,
+            "permission": 2,
+            "resource": 1
+        }
+    },
+    {
+        "model": "authtest.rolepermission",
+        "pk": 6,
+        "fields": {
+            "role": 3,
+            "permission": 1,
+            "resource": 1
+        }
+    },
+    {
+        "model": "auth.user",
+        "pk": 1,
+        "fields": {
+            "username": "admin",
+            "email": "admin@example.com",
+            "is_staff": true,
+            "is_superuser": true,
+            "password": "pbkdf2_sha256$1000000$UzY3j0yr5oih78uVbRcbFG$P9FuJhx6haUz6GkylT2Y4obP05/a9Nwi62Fd2Cyr2Fw="
+        }
+    },
+    {
+        "model": "auth.user",
+        "pk": 2,
+        "fields": {
+            "username": "user",
+            "email": "user@example.com",
+            "is_staff": false,
+            "is_superuser": false,
+            "password": "pbkdf2_sha256$1000000$HIaLqMHquT8uxzFwvDinim$td+JOV2wrvWDzDA3QP8h60wa71agZRBhQbk/HqutS0E="
+        }
+    },
+    {
+        "model": "auth.user",
+        "pk": 3,
+        "fields": {
+            "username": "guest",
+            "email": "guest@example.com",
+            "is_staff": false,
+            "is_superuser": false,
+            "password": "pbkdf2_sha256$1000000$rmuFASCGS9IurNKGH2s9iB$wzz8Qn8DqEQXdQcPAD/o5LKC+ohxmQnGRprdHGDOCrc="
+        }
+    },
+    {
+        "model": "authtest.userrole",
+        "pk": 1,
+        "fields": {
+            "user": 1,
+            "role": 1
+        }
+    },
+    {
+        "model": "authtest.userrole",
+        "pk": 2,
+        "fields": {
+            "user": 2,
+            "role": 2
+        }
+    },
+    {
+        "model": "authtest.userrole",
+        "pk": 3,
+        "fields": {
+            "user": 3,
+            "role": 3
+        }
+    }
+]

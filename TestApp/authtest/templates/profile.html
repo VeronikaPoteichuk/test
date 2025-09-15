@@ -15,7 +15,7 @@
 <div>
     <p><b>Имя:</b> {{ user.first_name }}</p>
     <p><b>Фамилия:</b> {{ user.last_name }}</p>
-    <p><b>Отчество:</b> {{ profile_obj.patronymic }}</p>
+    <p><b>Отчество:</b> {{ profile_obj.patronymic|default:"" }}</p>
     <p><b>Email:</b> {{ user.email }}</p>
 </div>
 {% endif %}
