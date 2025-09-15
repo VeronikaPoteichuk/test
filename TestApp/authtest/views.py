@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from .access_utils import check_access
+from django.contrib.auth import logout
 
 
 class RegisterForm(forms.ModelForm):
@@ -108,7 +109,6 @@ def profile_view(request):
 		if 'delete_account' in request.POST:
 			user.is_active = False
 			user.save()
-			from django.contrib.auth import logout
 			logout(request)
 			return redirect('home')
 		form = ProfileForm(request.POST, instance=profile, user=user)
@@ -145,7 +145,6 @@ def base_context(request):
 			profile = None
 	return {'profile_obj': profile}
 
-@login_required
 def all_users_view(request):
 	if not request.user.is_authenticated:
 		return JsonResponse({'error': 'Unauthorized'}, status=401)
@@ -163,12 +162,13 @@ def all_users_view(request):
 	]
 	return JsonResponse({'users': users_data})
 
-from .access_utils import check_access
 
-@login_required
+# @login_required
 def assign_role_page(request):
 	user = request.user
-	can_assign, code = check_access(user, 'userrole', 'assign_role')
+	if not user.is_authenticated:
+		return HttpResponse('Unauthorized', status=401)
+	can_assign, code = check_access(user, 'assign_role', 'assign_role_page')
 	if not can_assign:
 		return HttpResponse('Forbidden', status=403)
 	return render(request, 'assign_role.html', {'can_assign_role': True})

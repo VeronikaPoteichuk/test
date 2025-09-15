@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -10,47 +11,50 @@
 
   {% block extra_css %}{% endblock %}
 </head>
+
 <body class="bg-light">
 
   <nav class="navbar navbar-expand-lg bg-white border-bottom">
     <div class="container">
       <span class="navbar-text me-3">
         {% if user.is_authenticated %}
-          Привет, {{ user.first_name }}!
+        Привет, {{ user.first_name }}!
         {% else %}
-          Добро пожаловать!
+        Добро пожаловать!
         {% endif %}
       </span>
 
       <div class="ms-auto">
         <ul class="navbar-nav align-items-center">
           {% if user.is_authenticated %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'profile' %}">Профиль</a>
-            </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'profile' %}">Профиль</a>
+          </li>
 
-            {% if profile_obj and profile_obj.role and profile_obj.role.name == 'admin' %}
-              <li class="nav-item">
-                <a class="nav-link fw-semibold" href="/assign-role/">Панель назначения ролей</a>
-              </li>
+            {% if profile_obj.role.name == 'admin' %}
+            <li class="nav-item">
+              <a class="nav-link fw-semibold" href="/assign-role/">Панель назначения ролей</a>
+            </li>
+              {% if user.is_staff == True %}
               <li class="nav-item">
                 <a class="nav-link text-success fw-semibold" href="/admin/">Панель администратора</a>
-              </li>            
+              </li>
+              {% endif %}
             {% endif %}
 
-            <li class="nav-item">
-              <form action="{% url 'logout' %}" method="post" class="d-inline">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-link nav-link p-0">Выход</button>
-              </form>
-            </li>
+          <li class="nav-item">
+            <form action="{% url 'logout' %}" method="post" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-link nav-link p-0">Выход</button>
+            </form>
+          </li>
           {% else %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'register' %}">Регистрация</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'login' %}">Вход</a>
-            </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'register' %}">Регистрация</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}">Вход</a>
+          </li>
           {% endif %}
         </ul>
       </div>
@@ -59,12 +63,12 @@
 
   <main class="container py-4">
     {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-      {% endfor %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
     {% endif %}
 
     {% block content %}{% endblock %}
@@ -73,4 +77,5 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   {% block extra_js %}{% endblock %}
 </body>
+
 </html>
