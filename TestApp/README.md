@@ -24,13 +24,23 @@ TestApp — это приложение на Django, которое включа
    python manage.py migrate
    ```
 
-4. **Загрузка данных из фикстур**
+4. **Загрузка данных**
+    Из фикстур
+
    ```bash
    python manage.py loaddata rbac_fixture.json
+   ```
+    Из файла
+
+   ```shell
+   python manage.py shell
+   >>>from authtest.test_data import create_test_rbac_data
+   >>>create_test_rbac_data()
    ```
 
 5. **Запуск сервера разработки**
    ```bash
+   python manage.py collectstatic 
    python manage.py runserver
    ```
 
@@ -85,7 +95,7 @@ TestApp — это приложение на Django, которое включа
 
 ### 7. Тесты
 
-- Расположены в файле `authtest/tests.py`.
+- Расположены в папке `testы`.
 - Покрывают функционал управления ролями, ресурсами и разрешениями.
 
 ## Структура управления доступом
