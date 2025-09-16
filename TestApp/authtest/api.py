@@ -1,7 +1,5 @@
-from rest_framework import permissions, viewsets
 from django.contrib.auth.models import User
 from .models import Profile
-from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import serializers
 
